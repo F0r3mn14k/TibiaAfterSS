@@ -1,0 +1,7 @@
+pyautogui>=0.9.54,<1
+opencv-python>=4.8,<5
+keyring>=25,<27
+psutil>=5.9,<8
+pygetwindow>=0.0.9,<1
+Pillow>=10,<13
+pyinstaller>=6,<7

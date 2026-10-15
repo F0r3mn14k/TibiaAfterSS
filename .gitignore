@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.spec
+build/
+dist/
+
+# .NET build outputs and local release copies
+bin/
+obj/
+publish/
+publish-*/
+latest/
+*.exe
+*.dll
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+
+# Local configuration and IDE files
+.vs/
+settings.json

@@ -45,11 +45,11 @@ jobs:
         run: swift build -c release
       - name: Package macOS release
         working-directory: TibiaAfterSS-macOS
-        run: zip -j ../../TibiaAfterSS-macOS-arm64-x64.zip .build/release/TibiaAfterSSMac
+        run: zip -j ../../TibiaAfterSS-macOS.zip .build/release/TibiaAfterSSMac
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
-          path: TibiaAfterSS-macOS-arm64-x64.zip
+          path: TibiaAfterSS-macOS.zip
 
   release:
     needs: [windows, macos]
@@ -66,4 +66,4 @@ jobs:
           generate_release_notes: true
           files: |
             release-assets/release-windows/TibiaAfterSS-Windows-x64.zip
-            release-assets/release-macos/TibiaAfterSS-macOS-arm64-x64.zip
+            release-assets/release-macos/TibiaAfterSS-macOS.zip

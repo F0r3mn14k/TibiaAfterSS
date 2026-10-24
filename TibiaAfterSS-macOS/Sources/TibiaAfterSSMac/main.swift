@@ -49,7 +49,7 @@ final class AppModel: ObservableObject {
     }
 
     init() {
-        load(); startAtLogin = (try? SMAppService.mainApp.status == .enabled) ?? false
+        load(); startAtLogin = SMAppService.mainApp.status == .enabled
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in Task { @MainActor in self?.tick() } }
     }
     var nextActionText: String { "Następna postać: \(characterForToday()?.name ?? "brak")" }
@@ -94,7 +94,7 @@ final class AppModel: ObservableObject {
         guard let secret = Keychain.read(service: service, account: profile.account), !profile.appPath.isEmpty else { write("Brakuje hasła w Keychain lub ścieżki do klienta."); return }
         guard Automation.hasAccessibilityPermission(prompt: true) else { write("Brakuje uprawnienia Dostępność."); return }
         write("Próba logowania postaci \(character.name)."); await closeClient()
-        NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: profile.appPath), configuration: .init())
+        try? await NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: profile.appPath), configuration: .init())
         try? await Task.sleep(for: .seconds(profile.loadSeconds)); Automation.activateTibia()
         Automation.click(email); Automation.selectAll(); Automation.type(profile.account)
         Automation.click(passwordPoint); Automation.selectAll(); Automation.type(secret)
@@ -126,7 +126,7 @@ struct ContentView: View {
                 calibration("Pole e-mail", \.emailPoint); calibration("Pole hasła", \.passwordPoint); calibration("Przycisk Zaloguj", \.loginPoint); calibration("Przycisk Wejdź do gry", \.enterPoint)
             }
             Section("Rotacja postaci") {
-                List(selection: $model.selectedCharacter) { ForEach(model.profile.characters) { item in Text(item.toString()).tag(item.id) } }.frame(height: 110)
+                List(selection: $model.selectedCharacter) { ForEach(model.profile.characters) { item in Text(item.name).tag(item.id) } }.frame(height: 110)
                 HStack { TextField("Nazwa postaci", text: $newCharacter); Button("Dodaj") { model.addCharacter(named: newCharacter); newCharacter = "" }; Button("Ustaw pozycję") { Task { await model.captureCharacter() } }; Button("Usuń", role: .destructive) { model.removeSelected() } }
                 Text(model.nextActionText)
             }

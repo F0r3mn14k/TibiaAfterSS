@@ -1,0 +1,69 @@
+name: Build release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag release, np. v1.1.0"
+        required: true
+        default: "v1.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Publish Windows executable
+        run: >
+          dotnet publish TibiaAfterSS-1.1.0/TibiaAfterSS-1.1.0.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o dist/windows
+      - name: Package Windows release
+        shell: pwsh
+        run: Compress-Archive -Path dist/windows/TibiaAfterSS-1.1.0.exe -DestinationPath TibiaAfterSS-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: TibiaAfterSS-Windows-x64.zip
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build macOS executable
+        working-directory: TibiaAfterSS-macOS
+        run: swift build -c release
+      - name: Package macOS release
+        working-directory: TibiaAfterSS-macOS
+        run: zip -j ../../TibiaAfterSS-macOS-arm64-x64.zip .build/release/TibiaAfterSSMac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          path: TibiaAfterSS-macOS-arm64-x64.zip
+
+  release:
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: Tibia After SS ${{ inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          files: |
+            release-assets/release-windows/TibiaAfterSS-Windows-x64.zip
+            release-assets/release-macos/TibiaAfterSS-macOS-arm64-x64.zip

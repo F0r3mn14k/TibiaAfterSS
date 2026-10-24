@@ -45,7 +45,7 @@ jobs:
         run: swift build -c release
       - name: Package macOS release
         working-directory: TibiaAfterSS-macOS
-        run: zip -j ../../TibiaAfterSS-macOS.zip .build/release/TibiaAfterSSMac
+        run: zip -j ../TibiaAfterSS-macOS.zip .build/release/TibiaAfterSSMac
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
